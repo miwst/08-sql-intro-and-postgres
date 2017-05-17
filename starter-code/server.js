@@ -1,6 +1,7 @@
 'use strict';
 
 // TODO: Install and require the NPM Postgres package 'pg' into your server.js, and ensure that it is then listed as a dependency in your package.json
+const pg = require('pg');
 const fs = require('fs');
 const express = require('express');
 
@@ -13,13 +14,13 @@ const app = express();
 // Windows and Linux users; You should have retained the user/pw from the pre-work for this course.
 // Your url may require that it's composed of additional information including user and password
 // const conString = 'postgres://USER:PASSWORD@HOST:PORT/DBNAME';
-const conString = 'postgres://localhost:5432';
+const conString = 'postgres://postgres:1234@localhost:5432/database';
 
 // TODO: Our pg module has a Client constructor that accepts one argument: the conString we just defined.
 //       This is how it knows the URL and, for Windows and Linux users, our username and password for our
 //       database when client.connect is called on line 26. Thus, we need to pass our conString into our
 //       pg.Client() call.
-const client = new pg.Client('something needs to go here... read the instructions above!');
+const client = new pg.Client(conString);
 
 // REVIEW: Use the client object to connect to our DB.
 client.connect();
@@ -35,6 +36,7 @@ app.use(express.static('./public'));
 app.get('/new', function(request, response) {
   // COMMENT: What number(s) of the full-stack-diagram.png image correspond to the following line of code? Identify which line(s) of code from the client-side blog app are interacting with this particular piece of `server.js`, and the name of the method. Do those lines of code interact with or invoke a different portion of the blog, and if so, where? What part of CRUD is being enacted/managed by this particular piece of code?
   // Put your response here...
+  // since we're sending the new.html file, number 5 would apply.  This is a get method where the user is getting a view.  This method is only acessed when the user navigates to the /new url.  No ajax method applies.
   response.sendFile('new.html', {root: './public'});
 });
 
@@ -43,6 +45,7 @@ app.get('/new', function(request, response) {
 app.get('/articles', function(request, response) {
   // COMMENT: What number(s) of the full-stack-diagram.png image correspond to the following line of code? Identify which line(s) of code from the client-side blog app are interacting with this particular piece of `server.js`, and the name of the method. Do those lines of code interact with or invoke a different portion of the blog, and if so, where? What part of CRUD is being enacted/managed by this particular piece of code?
   // Put your response here...
+  // since we are querying for data, numbers 3 and 4 would apply, this would be the READ in CRUD.  We're using a get method originating from an ajax request on article.js on lines 45-54.  The response from the databasse in being passed into Article.loadAll on line 50.
   client.query('SELECT * FROM articles')
   .then(function(result) {
     response.send(result.rows);
@@ -55,6 +58,7 @@ app.get('/articles', function(request, response) {
 app.post('/articles', function(request, response) {
   // COMMENT: What number(s) of the full-stack-diagram.png image correspond to the following line of code? Identify which line(s) of code from the client-side blog app are interacting with this particular piece of `server.js`, and the name of the method. Do those lines of code interact with or invoke a different portion of the blog, and if so, where? What part of CRUD is being enacted/managed by this particular piece of code?
   // Put your response here...
+  // since we are adding items to the database using INSERT, 3 would apply.  This would be the CREATE in CRUD.  This route is hit from the post method originating in article.js on lines 69-75.  It doesn't invoke anything on the front end except for a console.log confirming the addition.
   client.query(
     `INSERT INTO
     articles(title, author, "authorUrl", category, "publishedOn", body)
@@ -80,6 +84,7 @@ app.post('/articles', function(request, response) {
 app.put('/articles/:id', function(request, response) {
   // COMMENT: What number(s) of the full-stack-diagram.png image correspond to the following line of code? Identify which line(s) of code from the client-side blog app are interacting with this particular piece of `server.js`, and the name of the method. Do those lines of code interact with or invoke a different portion of the blog, and if so, where? What part of CRUD is being enacted/managed by this particular piece of code?
   // Put your response here...
+  // we're updating data here and not passing it back to the front end, so only 3 would apply.  This is a PUT method.  This method is beinf called on lines 88-105 in article.js.
   client.query(
     `UPDATE articles
     SET
@@ -107,6 +112,7 @@ app.put('/articles/:id', function(request, response) {
 app.delete('/articles/:id', function(request, response) {
   // COMMENT: What number(s) of the full-stack-diagram.png image correspond to the following line of code? Identify which line(s) of code from the client-side blog app are interacting with this particular piece of `server.js`, and the name of the method. Do those lines of code interact with or invoke a different portion of the blog, and if so, where? What part of CRUD is being enacted/managed by this particular piece of code?
   // Put your response here...
+  // like the put and post request, only 3 would apply.  Like the post/put methods, we're only sending a string confirmation back to the front end, so number 4 is skipped.  This method is being invoked by an AJAX request on lines 77-86 in article.js
   client.query(
     `DELETE FROM articles WHERE article_id=$1;`,
     [request.params.id]
